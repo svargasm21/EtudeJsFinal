@@ -14,14 +14,31 @@ const Header = ({children}: {children : ReactNode}) => {
 
             <Link href="/" className="text-2xl font-bold" style={{ color: '#e7dfcf' }} > EtudeJS </Link>
 
-            <ul className='flex flex-row items-center gap-8'>
-                <Link href='/courses' className={cn(
-                    "text-base cursor-pointer capitalize", 
-                    pathname === '/courses' ? 'text-primary font-semibold' : 'text-muted-foreground')}> 
-                    Courses
-                </Link>
-            </ul>
-        </header>
+      {/* Navegación */}
+      <nav>
+        <ul className="flex items-center space-x-6">
+          <Link
+            href="/login"
+            className={cn(
+              'text-base cursor-pointer capitalize transition-colors',
+              pathname === '/login' ? 'text-primary font-semibold' : 'text-muted-foreground'
+            )}
+          >
+            Login
+          </Link>
+
+          <Link
+            href="/courses"
+            className={cn(
+              'text-base cursor-pointer capitalize transition-colors',
+              pathname === '/courses' ? 'text-primary font-semibold' : 'text-muted-foreground'
+            )}
+          >
+            Courses
+          </Link>
+        </ul>
+      </nav>
+    </header>
     );
 };
 
