@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import bcrypt from 'bcrypt'
-
+import { hashPassword } from '@/lib/auth';
 export async function POST(req: Request) {
   try {
     const { nombre, correo, contrasena } = await req.json()
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const hashed = await bcrypt.hash(contrasena, 10)
+    const hashed = await hashPassword(contrasena);
     const newUser = await db.usuario.create({
       data: { nombre, correo, contrasena: hashed }
     })
