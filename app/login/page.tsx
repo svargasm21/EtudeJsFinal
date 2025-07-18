@@ -10,19 +10,29 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const ruta = modo === 'login' ? '/api/login' : '/api/registro'
+    const ruta = modo === 'login' ? '/api/auth/login' : '/api/auth/register'
 
     const res = await fetch(ruta, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo, contrasena, nombre }),
+      body: JSON.stringify({ nombre, correo, contrasena }),
     })
 
     const data = await res.json()
+    // Usa data.message o data.error, según venga de la API
+    const feedback = data.message ?? data.error ?? 'Error desconocido'
+
     if (res.ok) {
-      alert(modo === 'login' ? 'Welcome' : 'User registered')
+      alert(feedback) // "Login exitoso" o "Usuario creado exitosamente"
+      if (modo === 'login') {
+        // redirige tras login, por ejemplo
+        window.location.href = '/courses'
+      } else {
+        // tras registro, pasa a login
+        setModo('login')
+      }
     } else {
-      alert(data.message || 'Error')
+      alert(feedback) // "El correo ya está registrado" o "Usuario o contraseña incorrecta"
     }
   }
 
