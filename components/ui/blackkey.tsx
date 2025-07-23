@@ -8,10 +8,13 @@ interface KeyProps {
 }
 
 const BlackKey = ({ note, pressed = false, onPress, onRelease }: KeyProps) => {
+  // Extraer solo la letra sin el número
+  const displayNote = note.replace('1', '');
+  
   return (
-    <div className="flex items-center justify-center h-full">
+    <div className="flex items-center justify-center h-full relative z-10">
       <div
-        className={`relative -ml-[17px] -mr-[17px] h-[200px] w-[30px] z-[2] flex flex-col justify-end items-center pb-2 transition-colors ${
+        className={`absolute -ml-[17px] -mr-[17px] h-[180px] w-[30px] z-20 flex flex-col justify-end items-center pb-2 transition-colors top-0 ${
           pressed ? 'bg-gray-600' : 'bg-black'
         }`}
         onMouseDown={onPress}
@@ -20,7 +23,7 @@ const BlackKey = ({ note, pressed = false, onPress, onRelease }: KeyProps) => {
         onTouchStart={onPress}
         onTouchEnd={onRelease}
       >
-        <span className="text-white font-bold">{note}</span>
+        <span className="text-white font-bold text-xs">{displayNote}</span>
       </div>
     </div>
   );
