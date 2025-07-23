@@ -214,9 +214,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 🙏 Agradecimientos
 
-- 🎵 Samples de audio de [freesound.org](https://freesound.org)
-- 🎨 Iconos de [Heroicons](https://heroicons.com)
-- 🌟 Inspiración de plataformas como Simply Piano y Flowkey
+- 🎵 Samples de audio de YO, gracias
 
 ---
 
