@@ -1,3 +1,11 @@
+DATABASE_URL="postgresql://etudejs_user:DPjOdL7Dp5LDipcVw17xF0XyiI8kk3D8@dpg-d1sqgv15pdvs73cs0q10-a.oregon-postgres.render.com/etudejs"
+JWT_SECRET="z7F8kL2#nV9pQx3RjH6tWm5YbU1sC4eZdT0gXaVzN8rMfLpSjKqHwTyBcVeRgHu"
+BCRYPT_SALT_ROUNDS="12"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="dnoc9zacr"
+CLOUDINARY_CLOUD_NAME="dnoc9zacr"
+CLOUDINARY_API_KEY="673984385274951"
+CLOUDINARY_API_SECRET="fZwlIg0s5lZ_q2gCvMpUt7djGnU"
+
 # 🎹 EtudeJS - Tu Academia Musical Digital 🎵
 
 ¡Bienvenido a **EtudeJS**! 🌟 Una plataforma revolucionaria de aprendizaje musical donde la tecnología se encuentra con la pasión por la música. 
