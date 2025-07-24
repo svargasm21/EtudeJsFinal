@@ -25,8 +25,22 @@ model Curso {
   dificultad    String?       @db.VarChar(50)
   fechaCreacion DateTime      @default(now())
   inscripciones Inscripcion[]
+  lecciones     Leccion[]
 
   @@map("cursos")
+}
+
+model Leccion {
+  id            Int       @id @default(autoincrement())
+  titulo        String    @db.VarChar(200)
+  descripcion   String?
+  videoUrl      String    @db.VarChar(1000)
+  fechaCreacion DateTime  @default(now())
+  cursoId       Int
+  curso         Curso     @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  @@unique([cursoId])
+  @@map("lecciones")
 }
 
 model Inscripcion {
