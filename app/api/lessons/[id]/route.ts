@@ -105,7 +105,7 @@ export async function POST(
     }
 
     const lesson = await db.leccion.update({
-      where: { id: lessonToUpdate.id },
+      where: { id: lessonId },
       data: {
         videoUrl: response.secure_url,
       },

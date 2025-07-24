@@ -1,5 +1,6 @@
 "use client"
 
+import { useAuth } from "@/app/hooks/useAuth"
 import {
   Dialog,
   DialogClose,
@@ -11,13 +12,16 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { redirect } from "next/navigation"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "../../../components/ui/button"
 import BookList from "../../../components/ui/CourseList"
 import { sampleBooks } from "../../constants"
 
 const Courses = () => {
-  const inProgressCourses = sampleBooks.slice(0, 2)
+  const { user } = useAuth()
+  const [courses, setCourses] = useState<any | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const availableCourses = sampleBooks.slice(2)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -52,6 +56,20 @@ const Courses = () => {
       redirect(`/courses/${data1.id}`)
     }
   }
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      const res = await fetch(`/api/courses/`)
+      if (!res.ok) {
+        toast("Ocurrio un error")
+      }
+
+      const data = await res.json()
+      setCourses(data)
+      setIsLoading(false)
+    }
+    fetchCourses()
+  }, [])
 
   return (
     <div className="max-w-7xl mx-auto px-4">
@@ -127,17 +145,11 @@ const Courses = () => {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-        <div className="bg-gradient-to-br from-blue-600/20 to-blue-500/20 backdrop-blur-sm border border-blue-400/20 rounded-xl p-6 text-center hover:border-blue-400/40 transition-all duration-300 group">
-          <div className="text-3xl font-bold text-blue-300 mb-2 group-hover:scale-110 transition-transform duration-300">
-            3
-          </div>
-          <p className="text-gray-400">Completados</p>
-        </div>
         <div className="bg-gradient-to-br from-green-600/20 to-green-500/20 backdrop-blur-sm border border-green-400/20 rounded-xl p-6 text-center hover:border-green-400/40 transition-all duration-300 group">
           <div className="text-3xl font-bold text-green-300 mb-2 group-hover:scale-110 transition-transform duration-300">
-            2
+            {user ? user?.inscripciones?.length : "..."}
           </div>
-          <p className="text-gray-400">En Progreso</p>
+          <p className="text-gray-400">Cursos inscritos</p>
         </div>
       </div>
 
@@ -151,22 +163,28 @@ const Courses = () => {
             </h2>
             <p className="text-gray-400">Cursos que tienes en progreso</p>
           </div>
-          <Button
-            variant="outline"
-            className="border-yellow-400/40 text-yellow-200 hover:bg-yellow-400/10"
-          >
-            Ver Todos
-          </Button>
         </div>
 
-        {inProgressCourses.length > 0 ? (
+        {user && user.inscripciones && user.inscripciones.length !== 0 ? (
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-transparent rounded-2xl blur-xl"></div>
             <div className="relative bg-gradient-to-br from-gray-900/60 to-gray-800/40 backdrop-blur-sm border border-green-400/20 rounded-2xl p-6">
               <BookList
                 title=""
-                courses={inProgressCourses}
-                containerClassName=""
+                courses={user.inscripciones.map((i) => ({
+                  id: i.curso.id,
+                  title: i.curso.titulo,
+                  progress: i.progreso?.porcentajeAvance,
+                  image: i.curso.imagen,
+                  author: i.curso.autor,
+                  coverColor: i.curso.colorPortada,
+                  description: i.curso.descripcion,
+                  coverUrl: i.curso.imagen,
+                  genre: i.curso.usuario.nombre,
+                  rating: i.curso.calificacion,
+                  summary: i.curso.sobre,
+                  totalCopies: i.curso.cantidadCopias,
+                }))}
               />
             </div>
           </div>
@@ -205,22 +223,31 @@ const Courses = () => {
             </h2>
             <p className="text-gray-400">Amplía tus conocimientos musicales</p>
           </div>
-          <Button
-            variant="outline"
-            className="border-blue-400/40 text-blue-200 hover:bg-blue-400/10"
-          >
-            Ver Catálogo Completo
-          </Button>
         </div>
 
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent rounded-2xl blur-xl"></div>
           <div className="relative bg-gradient-to-br from-gray-900/60 to-gray-800/40 backdrop-blur-sm border border-blue-400/20 rounded-2xl p-6">
-            <BookList
-              title=""
-              courses={availableCourses}
-              containerClassName=""
-            />
+            {courses && courses.length !== 0 && (
+              <BookList
+                title=""
+                courses={courses.map((c: any) => ({
+                  id: c.id,
+                  title: c.titulo,
+                  progress: 0,
+                  image: c.imagen,
+                  author: c.autor,
+                  coverColor: c.colorPortada,
+                  description: c.descripcion,
+                  coverUrl: c.imagen,
+                  genre: c.usuario.nombre,
+                  rating: c.calificacion,
+                  summary: c.sobre,
+                  totalCopies: c.cantidadCopias,
+                }))}
+                containerClassName=""
+              />
+            )}
           </div>
         </div>
       </section>

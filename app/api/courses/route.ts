@@ -68,7 +68,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newCourse, { status: 201 })
   } catch (error) {
-    console.log(error)
     const errorMessage =
       typeof error === "object" && error !== null && "message" in error
         ? (error as { message: string }).message

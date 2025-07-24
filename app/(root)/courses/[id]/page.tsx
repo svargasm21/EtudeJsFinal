@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { redirect, useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -47,6 +49,48 @@ const Course = () => {
     }
   }
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const body = Object.fromEntries(formData)
+
+    const res1 = await fetch("/api/lessons", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: body.title,
+        description: body.description,
+        courseId: course?.curso.id,
+      }),
+    })
+    const data1 = await res1.json()
+    if (!res1.ok) {
+      toast("Ha ocurrido un error")
+      return
+    }
+    setTimeout(() => {
+      const uploadVideo = async () => {
+        const formData2 = new FormData()
+        if (body.videoUrl) {
+          formData2.append("video", body.videoUrl)
+        }
+
+        const res2 = await fetch(`/api/lessons/${data1.id}`, {
+          method: "POST",
+          body: formData2,
+        })
+
+        if (!res2.ok) {
+          toast("Ha ocurrido un error")
+          return
+        } else {
+          toast("Lección creada con exito")
+        }
+      }
+      uploadVideo()
+    }, 1000)
+  }
+
   return (
     <div>
       {isLoading && <p className="text-gray-300">Cargando...</p>}
@@ -63,8 +107,51 @@ const Course = () => {
               <div className="flex flex-wrap gap-4">
                 <Dialog>
                   <DialogTrigger asChild>
+                    <Button className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-semibold px-8 py-3 shadow-lg hover:shadow-yellow-400/20 transition-all duration-300">
+                      Añadir lección
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Añadir lección</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit}>
+                      <div className="grid gap-4">
+                        <div className="grid gap-3">
+                          <Label htmlFor="title">Titulo</Label>
+                          <Input
+                            id="title"
+                            name="title"
+                            placeholder="Lección N°1"
+                          />
+                        </div>
+                        <div className="grid gap-3">
+                          <Label htmlFor="description">Descripción</Label>
+                          <Input
+                            id="description"
+                            name="description"
+                            placeholder="Descripción de la lección"
+                          />
+                        </div>
+                        <div className="grid gap-3">
+                          <Label htmlFor="videoUrl">Video</Label>
+                          <Input id="videoUrl" name="videoUrl" type="file" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end gap-4 mt-4">
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancelar</Button>
+                        </DialogClose>
+                        <Button type="submit">Crear</Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+                <Dialog>
+                  <DialogTrigger asChild>
                     <Button
-                      className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-semibold px-8 py-3 shadow-lg hover:shadow-yellow-400/20 transition-all duration-300"
+                      variant="outline"
+                      className="border-yellow-400/40 hover:bg-yellow-400/10 px-8 py-3"
                       onClick={handleDelete}
                     >
                       Eliminar

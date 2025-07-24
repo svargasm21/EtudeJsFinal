@@ -42,7 +42,6 @@ model Leccion {
   cursoId       Int
   curso         Curso     @relation(fields: [cursoId], references: [id], onDelete: Cascade)
 
-  @@unique([cursoId])
   @@map("lecciones")
 }
 

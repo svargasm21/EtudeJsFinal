@@ -23,7 +23,6 @@ const Lesson = () => {
     })
 
     const data = await response.json()
-    console.log(data)
   }
   return (
     <div className="max-w-7xl mx-auto px-4">
