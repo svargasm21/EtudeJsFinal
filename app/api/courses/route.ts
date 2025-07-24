@@ -79,3 +79,23 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const courses = await db.curso.findMany({
+      include: {
+        usuario: true,
+      },
+    })
+    return NextResponse.json(courses, { status: 201 })
+  } catch (error) {
+    const errorMessage =
+      typeof error === "object" && error !== null && "message" in error
+        ? (error as { message: string }).message
+        : String(error)
+    return NextResponse.json(
+      { error: "Internal server error", details: errorMessage },
+      { status: 500 }
+    )
+  }
+}
