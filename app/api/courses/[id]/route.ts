@@ -31,6 +31,7 @@ export async function DELETE(
             progreso: true,
           },
         },
+        cursos: true,
       },
     })
 
@@ -43,20 +44,15 @@ export async function DELETE(
 
     if (isNaN(courseId)) {
       return NextResponse.json(
-        { message: "Invalid course ID provided." },
+        { message: "El ID del curso debe ser un número." },
         { status: 400 }
       )
     }
 
-    const courseToDelete = await db.curso.findUnique({
-      where: {
-        id: courseId,
-      },
-    })
-
+    const courseToDelete = user.cursos.find((course) => course.id === courseId)
     if (!courseToDelete) {
       return NextResponse.json(
-        { message: "Course not found." },
+        { message: "Curso no encontrado." },
         { status: 404 }
       )
     }

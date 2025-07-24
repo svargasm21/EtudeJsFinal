@@ -17,7 +17,7 @@ const Lesson = () => {
       formData.append("video", file)
     }
 
-    const response = await fetch("/api/lessons/upload", {
+    const response = await fetch(`/api/lessons/${id}`, {
       method: "POST",
       body: formData,
     })

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
 import { v2 as cloudinary } from "cloudinary"
-import { writeFile } from "fs/promises"
+import { unlink, writeFile } from "fs/promises"
 import jwt from "jsonwebtoken"
 import { NextRequest, NextResponse } from "next/server"
 import { join } from "path"
@@ -13,7 +13,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const token = request.cookies.get("token")
     if (!token) {
@@ -37,7 +40,11 @@ export async function POST(request: NextRequest) {
             progreso: true,
           },
         },
-        cursos: true,
+        cursos: {
+          include: {
+            lecciones: true,
+          },
+        },
       },
     })
     if (!user) {
@@ -55,13 +62,56 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
 
     // Save video
-    const filepath = join(process.cwd(), "public", video.name)
+    const filepath = join(process.cwd(), "public/tmp", video.name)
     writeFile(filepath, buffer)
 
     // Upload to cloudinary
     const response = await cloudinary.uploader.upload(filepath, {
       resource_type: "video",
     })
+
+    // Delete temp file
+    if (filepath) {
+      try {
+        await unlink(filepath)
+        console.log(`Archivo temporal eliminado: ${filepath}`)
+      } catch (unlinkError) {
+        console.error(
+          `Error al eliminar el archivo temporal ${filepath}:`,
+          unlinkError
+        )
+      }
+    }
+
+    // Update lesson
+    const { id } = params
+    const lessonId = parseInt(id, 10)
+
+    if (isNaN(lessonId)) {
+      return NextResponse.json(
+        { message: "El ID de la lección debe ser un número." },
+        { status: 400 }
+      )
+    }
+
+    const lessonToUpdate = user.cursos.find((curso) =>
+      curso.lecciones.some((leccion) => leccion.id === lessonId)
+    )
+    if (!lessonToUpdate) {
+      return NextResponse.json(
+        { error: "La lección no existe." },
+        { status: 404 }
+      )
+    }
+
+    const lesson = await db.leccion.update({
+      where: { id: lessonToUpdate.id },
+      data: {
+        videoUrl: response.secure_url,
+      },
+    })
+
+    return NextResponse.json(lesson, { status: 200 })
   } catch (error) {
     const errorMessage =
       typeof error === "object" && error !== null && "message" in error
