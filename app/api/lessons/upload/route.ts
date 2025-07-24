@@ -1,14 +1,16 @@
 import { db } from "@/lib/db"
+import { v2 as cloudinary } from "cloudinary"
+import { writeFile } from "fs/promises"
 import jwt from "jsonwebtoken"
 import { NextRequest, NextResponse } from "next/server"
-import { z } from "zod"
+import { join } from "path"
 
 const JWT_SECRET = process.env.JWT_SECRET || "tu-clave-secreta"
 
-const createLessonSchema = z.object({
-  title: z.string().min(1, "El título es requerido.").max(200),
-  description: z.string().optional(),
-  courseId: z.number().min(1, "El curso es requerido."),
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
 export async function POST(request: NextRequest) {
@@ -42,33 +44,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const body = await request.json()
-
-    const validation = createLessonSchema.safeParse(body)
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error.format() },
-        { status: 400 }
-      )
-    }
-    const { title, description, courseId } = validation.data
-
-    const course = user.cursos.find((course) => course.id === courseId)
-    if (!course) {
-      return NextResponse.json({ error: "El curso no existe" }, { status: 404 })
+    // Upload Video
+    const data = await request.formData()
+    const video = data.get("video") as File
+    if (!video) {
+      return NextResponse.json({ error: "No video provided" }, { status: 400 })
     }
 
-    const newLesson = await db.leccion.create({
-      data: {
-        titulo: title,
-        descripcion: description,
-        fechaCreacion: new Date(),
-        cursoId: courseId,
-        videoUrl: "",
-      },
+    const bytes = await video.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    // Save video
+    const filepath = join(process.cwd(), "public", video.name)
+    writeFile(filepath, buffer)
+
+    // Upload to cloudinary
+    const response = await cloudinary.uploader.upload(filepath, {
+      resource_type: "video",
     })
-
-    return NextResponse.json(newLesson, { status: 201 })
   } catch (error) {
     const errorMessage =
       typeof error === "object" && error !== null && "message" in error
