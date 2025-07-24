@@ -131,84 +131,87 @@ const Course = () => {
             <p className="text-gray-300 text-xl leading-relaxed mb-8">
               {course?.curso.descripcion}
             </p>
-            {isAdmin && (
-              <div className="flex flex-wrap gap-4">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-semibold px-8 py-3 shadow-lg hover:shadow-yellow-400/20 transition-all duration-300">
-                      Añadir lección
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Añadir lección</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit}>
-                      <div className="grid gap-4">
-                        <div className="grid gap-3">
-                          <Label htmlFor="title">Titulo</Label>
-                          <Input
-                            id="title"
-                            name="title"
-                            placeholder="Lección N°1"
-                          />
+            <div className="flex flex-wrap gap-4">
+              {isAdmin && (
+                <>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-semibold px-8 py-3 shadow-lg hover:shadow-yellow-400/20 transition-all duration-300">
+                        Añadir lección
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Añadir lección</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleSubmit}>
+                        <div className="grid gap-4">
+                          <div className="grid gap-3">
+                            <Label htmlFor="title">Titulo</Label>
+                            <Input
+                              id="title"
+                              name="title"
+                              placeholder="Lección N°1"
+                            />
+                          </div>
+                          <div className="grid gap-3">
+                            <Label htmlFor="description">Descripción</Label>
+                            <Input
+                              id="description"
+                              name="description"
+                              placeholder="Descripción de la lección"
+                            />
+                          </div>
+                          <div className="grid gap-3">
+                            <Label htmlFor="videoUrl">Video</Label>
+                            <Input id="videoUrl" name="videoUrl" type="file" />
+                          </div>
                         </div>
-                        <div className="grid gap-3">
-                          <Label htmlFor="description">Descripción</Label>
-                          <Input
-                            id="description"
-                            name="description"
-                            placeholder="Descripción de la lección"
-                          />
+                        <div className="flex items-center justify-end gap-4 mt-4">
+                          <DialogClose asChild>
+                            <Button variant="outline">Cancelar</Button>
+                          </DialogClose>
+                          <Button type="submit">Crear</Button>
                         </div>
-                        <div className="grid gap-3">
-                          <Label htmlFor="videoUrl">Video</Label>
-                          <Input id="videoUrl" name="videoUrl" type="file" />
-                        </div>
-                      </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="border-yellow-400/40 hover:bg-yellow-400/10 px-8 py-3"
+                      >
+                        Eliminar
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>
+                          ¿Estas seguro de eliminar este curso?
+                        </DialogTitle>
+                      </DialogHeader>
                       <div className="flex items-center justify-end gap-4 mt-4">
                         <DialogClose asChild>
                           <Button variant="outline">Cancelar</Button>
                         </DialogClose>
-                        <Button type="submit">Crear</Button>
+                        <Button type="submit" onClick={handleDelete}>
+                          Eliminar
+                        </Button>
                       </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="border-yellow-400/40 hover:bg-yellow-400/10 px-8 py-3"
-                    >
-                      Eliminar
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>
-                        ¿Estas seguro de eliminar este curso?
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="flex items-center justify-end gap-4 mt-4">
-                      <DialogClose asChild>
-                        <Button variant="outline">Cancelar</Button>
-                      </DialogClose>
-                      <Button type="submit" onClick={handleDelete}>
-                        Eliminar
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Button
-                  variant="outline"
-                  className="border-yellow-400/40 hover:bg-yellow-400/10 px-8 py-3"
-                  onClick={handleDeleteInscription}
-                >
-                  Abandonar curso
-                </Button>
-              </div>
-            )}
+                    </DialogContent>
+                  </Dialog>
+                </>
+              )}
+
+              <Button
+                variant="outline"
+                className="border-yellow-400/40 hover:bg-yellow-400/10 px-8 py-3"
+                onClick={handleDeleteInscription}
+              >
+                Abandonar curso
+              </Button>
+            </div>
           </div>
 
           {course.curso.lecciones &&
