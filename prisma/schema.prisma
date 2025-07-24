@@ -14,6 +14,7 @@ model Usuario {
   contrasena    String
   fechaRegistro DateTime      @default(now())
   inscripciones Inscripcion[]
+  cursos        Curso[]
 
   @@map("usuarios")
 }
@@ -24,6 +25,8 @@ model Curso {
   descripcion   String?
   dificultad    String?       @db.VarChar(50)
   fechaCreacion DateTime      @default(now())
+  usuarioId     Int
+  usuario       Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   inscripciones Inscripcion[]
   lecciones     Leccion[]
 
