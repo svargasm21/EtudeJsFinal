@@ -25,17 +25,31 @@ const Courses = () => {
     const formData = new FormData(e.currentTarget)
     const body = Object.fromEntries(formData)
 
-    const res = await fetch("/api/courses", {
+    const res1 = await fetch("/api/courses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
-    const data = await res.json()
+    const data1 = await res1.json()
 
-    if (!res.ok) {
-      toast(data.error ?? "Error desconocido")
+    if (!res1.ok) {
+      toast("Ha ocurrido un error")
+      return
+    }
+
+    const res2 = await fetch("/api/inscriptions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        courseId: data1.id,
+      }),
+    })
+
+    if (!res2.ok) {
+      toast("Ha ocurrido un error")
+      return
     } else {
-      redirect(`/courses/${data.id}`)
+      redirect(`/courses/${data1.id}`)
     }
   }
 
