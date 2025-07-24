@@ -1,13 +1,17 @@
 import { db } from "@/lib/db"
 import jwt from "jsonwebtoken"
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 
 const JWT_SECRET = process.env.JWT_SECRET || "tu-clave-secreta"
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+const createLessonSchema = z.object({
+  title: z.string().min(1, "El título es requerido.").max(200),
+  description: z.string().optional(),
+  courseId: z.number().min(1, "El curso es requerido."),
+})
+
+export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get("token")
     if (!token) {
@@ -31,44 +35,42 @@ export async function DELETE(
             progreso: true,
           },
         },
+        cursos: true,
       },
     })
-
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const { id } = params
-    const courseId = parseInt(id, 10)
+    const body = await request.json()
 
-    if (isNaN(courseId)) {
+    const validation = createLessonSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { message: "Invalid course ID provided." },
+        { error: validation.error.format() },
         { status: 400 }
       )
     }
+    const { title, description, courseId } = validation.data
 
-    const courseToDelete = await db.curso.findUnique({
-      where: {
-        id: courseId,
-      },
-    })
-
-    if (!courseToDelete) {
-      return NextResponse.json(
-        { message: "Course not found." },
-        { status: 404 }
-      )
+    const course = user.cursos.find((course) => course.id === courseId)
+    if (!course) {
+      return NextResponse.json({ error: "El curso no existe" }, { status: 404 })
     }
 
-    const deletedCourse = await db.curso.delete({
-      where: {
-        id: courseId,
+    const newLesson = await db.leccion.create({
+      data: {
+        titulo: title,
+        descripcion: description,
+        fechaCreacion: new Date(),
+        cursoId: courseId,
+        videoUrl: "/sample-video.mp4?updatedAt=1722593504152",
       },
     })
 
-    return NextResponse.json(deletedCourse, { status: 200 })
+    return NextResponse.json(newLesson, { status: 201 })
   } catch (error) {
+    console.log(error)
     const errorMessage =
       typeof error === "object" && error !== null && "message" in error
         ? (error as { message: string }).message
