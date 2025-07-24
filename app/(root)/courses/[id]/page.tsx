@@ -49,6 +49,34 @@ const Course = () => {
     }
   }
 
+  const handleDeleteLesson = async (lessonId: number) => {
+    const res = await fetch(`/api/lessons/${lessonId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    })
+    if (!res.ok) {
+      toast("Ha ocurrido un error")
+      return
+    } else {
+      toast("Lección eliminada con exito")
+    }
+  }
+
+  const handleDeleteInscription = async () => {
+    const res = await fetch(`/api/inscriptions/${course?.id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    })
+    if (!res.ok) {
+      toast("Ha ocurrido un error")
+      return
+    } else {
+      redirect("/courses/")
+    }
+  }
+
+  console.log(course)
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
@@ -152,7 +180,6 @@ const Course = () => {
                     <Button
                       variant="outline"
                       className="border-yellow-400/40 hover:bg-yellow-400/10 px-8 py-3"
-                      onClick={handleDelete}
                     >
                       Eliminar
                     </Button>
@@ -167,20 +194,76 @@ const Course = () => {
                       <DialogClose asChild>
                         <Button variant="outline">Cancelar</Button>
                       </DialogClose>
-                      <Button type="submit">Eliminar</Button>
+                      <Button type="submit" onClick={handleDelete}>
+                        Eliminar
+                      </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
+                <Button
+                  variant="outline"
+                  className="border-yellow-400/40 hover:bg-yellow-400/10 px-8 py-3"
+                  onClick={handleDeleteInscription}
+                >
+                  Abandonar curso
+                </Button>
               </div>
             )}
           </div>
-          <div className="lg:max bg-gradient-to-br from-gray-900/80 to-gray-800/60 backdrop-blur-sm border border-yellow-400/20 rounded-3xl p-12">
-            <video
-              src={course?.curso.video}
-              controls
-              className="w-full h-auto"
-            />
-          </div>
+
+          {course.curso.lecciones &&
+            course.curso.lecciones.map((lesson: any) => (
+              <div
+                className="lg:max bg-gradient-to-br from-gray-900/80 to-gray-800/60 backdrop-blur-sm border border-yellow-400/20 rounded-3xl p-12"
+                key={lesson.id}
+              >
+                <video
+                  src={lesson.videoUrl}
+                  controls
+                  className="w-full h-full object-cover"
+                />
+                <div className="flex justify-between mt-8">
+                  <div>
+                    <h2 className="text-gray-300 text-2xl leading-relaxed">
+                      {lesson.titulo}
+                    </h2>
+                    <p className="text-gray-300 text-xl leading-relaxed">
+                      {lesson.descripcion}
+                    </p>
+                  </div>
+                  <div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="border-yellow-400/40 hover:bg-yellow-400/10 px-8 py-3"
+                        >
+                          Eliminar
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>
+                            ¿Estas seguro de eliminar esta lección?
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="flex items-center justify-end gap-4 mt-4">
+                          <DialogClose asChild>
+                            <Button variant="outline">Cancelar</Button>
+                          </DialogClose>
+                          <Button
+                            type="submit"
+                            onClick={() => handleDeleteLesson(lesson.id)}
+                          >
+                            Eliminar
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </div>
+            ))}
         </div>
       )}
     </div>

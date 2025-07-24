@@ -1,6 +1,7 @@
 "use client"
 
 import { useAuth } from "@/app/hooks/useAuth"
+import CourseCover from "@/components/ui/CourseCover"
 import {
   Dialog,
   DialogClose,
@@ -16,13 +17,11 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "../../../components/ui/button"
 import BookList from "../../../components/ui/CourseList"
-import { sampleBooks } from "../../constants"
 
 const Courses = () => {
   const { user } = useAuth()
   const [courses, setCourses] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const availableCourses = sampleBooks.slice(2)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -56,6 +55,24 @@ const Courses = () => {
       redirect(`/courses/${data1.id}`)
     }
   }
+
+  const handleInscription = async (id: number) => {
+    const res = await fetch(`/api/inscriptions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        courseId: id,
+      }),
+    })
+    if (!res.ok) {
+      toast("Ha ocurrido un error")
+      return
+    } else {
+      redirect(`/courses/${id}`)
+    }
+  }
+  console.log(user)
+  console.log(courses)
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -228,26 +245,41 @@ const Courses = () => {
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent rounded-2xl blur-xl"></div>
           <div className="relative bg-gradient-to-br from-gray-900/60 to-gray-800/40 backdrop-blur-sm border border-blue-400/20 rounded-2xl p-6">
-            {courses && courses.length !== 0 && (
-              <BookList
-                title=""
-                courses={courses.map((c: any) => ({
-                  id: c.id,
-                  title: c.titulo,
-                  progress: 0,
-                  image: c.imagen,
-                  author: c.autor,
-                  coverColor: c.colorPortada,
-                  description: c.descripcion,
-                  coverUrl: c.imagen,
-                  genre: c.usuario.nombre,
-                  rating: c.calificacion,
-                  summary: c.sobre,
-                  totalCopies: c.cantidadCopias,
-                }))}
-                containerClassName=""
-              />
-            )}
+            <section>
+              <ul className="mt-10 flex flex-wrap gap-5 max-xs:justify-between xs:gap-10">
+                {courses &&
+                  courses.map((c: any) => (
+                    <li className="xs:w-52" key={c.id}>
+                      <CourseCover
+                        coverColor={c.colorPortada}
+                        coverImage={c.imagen}
+                      />
+                      <div className={"mt-4"}>
+                        <p className="mt-2 line-clamp-1 text-base font-semibold text-white xs:text-xl w-40 overflow-hidden whitespace-nowrap text-ellipsis">
+                          {c.titulo}
+                        </p>
+                        <p
+                          className="mt-1 line-clamp-1 text-sm italic text-light-100 xs:text-base"
+                          style={{ color: "#e7dfcf" }}
+                        >
+                          {c.usuario.nombre}
+                        </p>
+                      </div>
+                      {user &&
+                      user?.inscripciones?.find((i) => i.curso.id == c.id) ? (
+                        <Button className="mt-2 bg-gray-600">Inscrito</Button>
+                      ) : (
+                        <Button
+                          className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-semibold mt-2"
+                          onClick={() => handleInscription(c.id)}
+                        >
+                          Inscribir
+                        </Button>
+                      )}
+                    </li>
+                  ))}
+              </ul>
+            </section>
           </div>
         </div>
       </section>

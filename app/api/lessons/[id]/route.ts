@@ -123,3 +123,81 @@ export async function POST(
     )
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const token = request.cookies.get("token")
+    if (!token) {
+      return NextResponse.json({ error: "No token provided" }, { status: 401 })
+    }
+
+    const payload = jwt.verify(token.value, JWT_SECRET) as {
+      userId: number
+    }
+
+    const user = await db.usuario.findUnique({
+      where: { id: payload.userId },
+      select: {
+        id: true,
+        nombre: true,
+        correo: true,
+        fechaRegistro: true,
+        inscripciones: {
+          include: {
+            curso: true,
+            progreso: true,
+          },
+        },
+        cursos: {
+          include: {
+            lecciones: true,
+          },
+        },
+      },
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    const { id } = params
+    const lessonId = parseInt(id, 10)
+
+    if (isNaN(lessonId)) {
+      return NextResponse.json(
+        { message: "El ID del curso debe ser un número." },
+        { status: 400 }
+      )
+    }
+
+    const lessonToDelete = user.cursos.find((curso) =>
+      curso.lecciones.some((leccion) => leccion.id === lessonId)
+    )
+    if (!lessonToDelete) {
+      return NextResponse.json(
+        { error: "La lección no existe." },
+        { status: 404 }
+      )
+    }
+
+    const deletedLesson = await db.leccion.delete({
+      where: {
+        id: lessonId,
+      },
+    })
+
+    return NextResponse.json(deletedLesson, { status: 200 })
+  } catch (error) {
+    const errorMessage =
+      typeof error === "object" && error !== null && "message" in error
+        ? (error as { message: string }).message
+        : String(error)
+    return NextResponse.json(
+      { error: "Internal server error", details: errorMessage },
+      { status: 500 }
+    )
+  }
+}
